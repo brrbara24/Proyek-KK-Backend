@@ -59,7 +59,7 @@ const createData = async (req, res, next) => {
     }
 }
 
-const loadData = async (req, res, next) => {
+const login = async (req, res, next) => {
     try {
         const data = {
             nama: req.body.nama,
@@ -74,8 +74,39 @@ const loadData = async (req, res, next) => {
             })
         }
 
+        const query = 'SELECT * FROM user WHERE nama = ?'
+        const[rows] = await db.query(query, [data.nama]);
+
+        if (rows.length === 0){
+            return res.status(401).json({
+                status: "error",
+                message: "nama atau password salah"
+            });
+        }
+
+        const user = rows[0];
+
+        const isMatch = await bcrypt.compare(password, user.data.password);
+
+        if (!isMatch) {
+            return res.status(401).json({
+                message: 'nama atau password salah'
+            })
+        }
+
+        const token = jwt.sign(
+            {id: user.id, nama: user.data.nama},
+            process.env.JWT_SECRET,
+            {expiresIn: '1h'}
+        );
+
+        return res.status(200).json({
+            message: 'login berhasil',
+            token: token
+        })
+
     } catch (error) {
-        
+        next(error)
     }
 }
 
@@ -114,6 +145,7 @@ const deleteData = async (req, res) =>{
 
 module.exports = {
     tampilData,
+    login,
     createData,
     updateData,
     deleteData,
