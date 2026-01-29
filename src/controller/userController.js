@@ -1,5 +1,6 @@
 const db = require('../config/db.js')
 const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 
 const tampilData = async(req,res) =>{
     try {
@@ -44,7 +45,7 @@ const createData = async (req, res, next) => {
                 message: 'nama, email, password, dan role wajib diisi'
             })
         }
-    
+
     const hashedPassword = await bcrypt.hash(data.password, 10);
     const query = 'INSERT INTO user(nama, email, password, role) VALUE (?, ?, ?, ?)';
     await db.execute(query, [data.nama, data.email, hashedPassword, data.role]);
@@ -54,6 +55,26 @@ const createData = async (req, res, next) => {
     })
     } catch (error) {
         next(error)
+        
+    }
+}
+
+const loadData = async (req, res, next) => {
+    try {
+        const data = {
+            nama: req.body.nama,
+            email: req.body.email,
+            password: req.body.password,
+            role: req.body.role
+        }
+         if (!data.nama || !data.password || !data.email || !data.role) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'nama, email, password, dan role wajib diisi'
+            })
+        }
+
+    } catch (error) {
         
     }
 }
@@ -83,7 +104,7 @@ const deleteData = async (req, res) =>{
         const query = 'DELETE FROM user WHERE id = ?'
         await db.query(query, id);
         return res.status(201).json({
-            message: 'berhasil delete data'
+            message: 'berhasil delete data!'
         })
     } catch (error) {
         throw error
