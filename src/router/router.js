@@ -31,9 +31,10 @@ router.get('/produk/:id', auth, basoController.getById);
 
 router.get('/user', auth, userController.tampilData);
 router.post('/user/register', auth, userController.createData);
-router.login('/user/login', userController.login);
 router.put('/user/:id', auth, userController.updateData);
 router.delete('/user/:id', auth, userController.deleteData);
 router.get('/user/:id', userController.getById)
+
+router.post('/user/login', userController.login);
 
 module.exports = router
