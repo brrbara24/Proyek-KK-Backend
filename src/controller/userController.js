@@ -61,13 +61,9 @@ const createData = async (req, res, next) => {
 
 const login = async (req, res, next) => {
     try {
-        const data = {
-            nama: req.body.nama,
-            email: req.body.email,
-            password: req.body.password,
-            role: req.body.role
-        }
-         if (!data.nama || !data.password || !data.email || !data.role) {
+        const {nama, password, email, role} = req.body;
+        
+         if (!nama || !password || !email || !role) {
             return res.status(400).json({
                 status: 'error',
                 message: 'nama, email, password, dan role wajib diisi'
@@ -75,7 +71,7 @@ const login = async (req, res, next) => {
         }
 
         const query = 'SELECT * FROM user WHERE nama = ?'
-        const[rows] = await db.query(query, [data.nama]);
+        const[rows] = await db.query(query, [nama]);
 
         if (rows.length === 0){
             return res.status(401).json({
@@ -86,7 +82,7 @@ const login = async (req, res, next) => {
 
         const user = rows[0];
 
-        const isMatch = await bcrypt.compare(password, user.data.password);
+        const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
             return res.status(401).json({
@@ -95,7 +91,7 @@ const login = async (req, res, next) => {
         }
 
         const token = jwt.sign(
-            {id: user.id, nama: user.data.nama},
+            {id: user.id, nama: user.nama},
             process.env.JWT_SECRET,
             {expiresIn: '1h'}
         );
